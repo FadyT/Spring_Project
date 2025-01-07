@@ -27,10 +27,7 @@ class _SignUPPage extends State<SignUPPage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (context) => const ShoppingPage()),
-              );
+              navigateWithFade(context, const ShoppingPage()); // Navigate with fade animation
             },
             child: const Text('Close'),
           ),
@@ -49,6 +46,22 @@ class _SignUPPage extends State<SignUPPage> {
       _showDialog();
     }
   }
+
+  void navigateWithFade(BuildContext context, Widget page) {
+    Navigator.of(context).pushReplacement(
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => page,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      ),
+    );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

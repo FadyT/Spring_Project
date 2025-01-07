@@ -24,3 +24,7 @@ and text inside it use expanded widget for both images and text.
 - we have 3 methods check and submit to navigate to next page if all data are valid 
 - show snack bar to show snack bar contain the error if data is not valid
 - and show dialog to show successful signup if all data is valid
+
+
+## fade animation
+- added navigateWithFade function to fade the transition between pages and updated the dialog on press to fade instead of changing the page without effect
