@@ -24,6 +24,7 @@ and text inside it use expanded widget for both images and text.
 - we have 3 methods check and submit to navigate to next page if all data are valid 
 - show snack bar to show snack bar contain the error if data is not valid
 - and show dialog to show successful signup if all data is valid
+  <img width="1728" alt="image" src="https://github.com/user-attachments/assets/6ab345c3-8ea2-4757-b32d-d63ae2c37e04" />
 
 
 ## fade animation
