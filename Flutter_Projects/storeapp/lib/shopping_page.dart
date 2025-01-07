@@ -17,8 +17,7 @@ class _ShoppingPageState extends State<ShoppingPage> {
       //give a title to the page using appBar
       appBar: AppBar(title: const Text('Shopping App')),
       body: Center(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: ListView(
           children: [
             //place at the start of the page text says ""our products"" below it a pageView that shows images of the products
             const Padding(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:storeapp/sign_up_page.dart';
 
-import 'ShoppingPage.dart';
+import 'shopping_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Shopping App',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const ShoppingPage(),
+      home: const SignUPPage(),
     );
   }
 }

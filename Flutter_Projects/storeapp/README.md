@@ -2,7 +2,7 @@
 
 Simple store app
 
-## Getting Started
+## shopping_page
 
 - App use media query to design responsive UI.
 - it has a title using appBar
@@ -13,3 +13,14 @@ and text inside it use expanded widget for both images and text.
 - the page is scrollable horizontally."
 
 <img width="1728" alt="Screenshot 2025-01-04 at 4 15 03 AM" src="https://github.com/user-attachments/assets/6ffd6272-5e2c-45ae-83a4-3f6b3271bfa2" />
+
+
+## sign_up_page
+- in the page we have 4 textformfields one for username , email , pass and pass confirmation
+- we used a TextEditingController for each of them 
+- user name is checking that first letter is upper case
+- email check if it contains @
+- password check if both are matching and has more than 6 letter 
+- we have 3 methods check and submit to navigate to next page if all data are valid 
+- show snack bar to show snack bar contain the error if data is not valid
+- and show dialog to show successful signup if all data is valid
