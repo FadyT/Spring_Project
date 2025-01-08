@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 
 class ShoppingPage extends StatefulWidget {
@@ -15,14 +16,16 @@ class _ShoppingPageState extends State<ShoppingPage> {
 
     return Scaffold(
       //give a title to the page using appBar
-      appBar: AppBar(title: const Text('Shopping App')),
+      appBar: AppBar(
+        title: Text('appTitle'.tr()), // Localized app title
+      ),
       body: Center(
         child: ListView(
           children: [
             //place at the start of the page text says ""our products"" below it a pageView that shows images of the products
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('Our Products', style: TextStyle(fontSize: 24)),
+             Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text( 'ourProducts'.tr() , style: TextStyle(fontSize: 24)),
             ),
             // vertical list for products
             SizedBox(
@@ -64,7 +67,7 @@ class _ShoppingPageState extends State<ShoppingPage> {
                            fit: BoxFit.cover,
                          ),
                          const SizedBox(height: 8),
-                         const Text('Product Name'),
+                         Text('productName'.tr()),
                          IconButton(
                            icon: const Icon(Icons.add_shopping_cart),
                            onPressed: () {
@@ -80,9 +83,9 @@ class _ShoppingPageState extends State<ShoppingPage> {
                ),
              ),
             //below the gridView add a text says ""hot offers""
-            const Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Text('Hot Offers', style: TextStyle(fontSize: 24)),
+             Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Text('hotOffers'.tr(), style: TextStyle(fontSize: 24)),
             ),
             // using ListView builder build a list of 5 items with images
             // and text inside it use expanded widget for both images and text.
@@ -108,7 +111,7 @@ class _ShoppingPageState extends State<ShoppingPage> {
                         Expanded(
                           flex: 1,
                           child: Text(
-                            'Item ${index + 1}', // Replace with dynamic content
+                            '${'item'.tr()} ${index + 1}', // Replace with dynamic content
                             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),

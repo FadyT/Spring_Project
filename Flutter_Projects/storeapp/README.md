@@ -29,3 +29,10 @@ and text inside it use expanded widget for both images and text.
 
 ## fade animation
 - added navigateWithFade function to fade the transition between pages and updated the dialog on press to fade instead of changing the page without effect
+
+
+## localization to add arabic language 
+- we use easy localization library 
+- created ar.json to hold all the arabic text for fields ( appTitle , ourProducts , hotOffers , welcomeText , productName , item)
+- initialized the library in main 
+- used the library in shopping page 
