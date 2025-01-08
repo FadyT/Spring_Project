@@ -36,3 +36,4 @@ and text inside it use expanded widget for both images and text.
 - created ar.json to hold all the arabic text for fields ( appTitle , ourProducts , hotOffers , welcomeText , productName , item)
 - initialized the library in main 
 - used the library in shopping page 
+<img width="1728" alt="image" src="https://github.com/user-attachments/assets/9039ba09-d737-4fe7-b319-f53a86f1f373" />
