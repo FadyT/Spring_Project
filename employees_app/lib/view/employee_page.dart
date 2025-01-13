@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:employees_app/service/api_service.dart';
 
@@ -55,41 +56,34 @@ class _EmployeeScreenState extends State<EmployeeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Employee List')),
-      body:Center(child: Column(
-        children: [
-          InkWell(
-            onTap: _fetchData,
-            child: const Text('  Fetch Employee Data  .' ,
-              style: TextStyle(backgroundColor: Colors.blue ,height: 5 , wordSpacing: 4),
-            ),
-          ),
-          if (_isLoading)
-            const CircularProgressIndicator()
-          else if (_employees.isEmpty)
-            const Text('No data available')
-          else
-            Expanded(
-              child: ListView.builder(
-                itemCount: _employees.length,
-                itemBuilder: (context, index) {
-                  final employee = _employees[index];
-                  return ListTile(
-                    title: Text(employee.name),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Email: ${employee.email}'),
-                        Text('Phone: ${employee.phone}'),
-                      ],
-                    ),
-                  );
-                },
+        appBar: AppBar(title: const Text('Employee List')),
+        body:Center(child: Column(
+          children: [
+            InkWell(
+              onTap: _fetchData,
+              child: const Text('  Fetch Employee Data  .' ,
+                style: TextStyle(backgroundColor: Colors.blue ,height: 5 , wordSpacing: 4),
               ),
             ),
-        ],
-      ),
-      )
+            if (_isLoading)
+              const CircularProgressIndicator()
+            else if (_employees.isEmpty)
+              const Text('No data available')
+            else
+              Expanded(
+                child: ListView.builder(
+                  itemCount: _employees.length,
+                  itemBuilder: (context, index) {
+                    final employee = _employees[index];
+                    return ListTile(
+                      title: Text(employee.name),
+                    );
+                  },
+                ),
+              ),
+          ],
+        ),
+        )
     );
   }
 }
