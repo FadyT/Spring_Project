@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../model/ employee_model.dart';
 
@@ -18,5 +20,21 @@ class ApiService {
     } catch (e) {
       throw Exception('Error fetching data: $e');
     }
+  }
+
+  Future<void> cacheEmployees(List<Employee> employees) async {
+    final prefs = await SharedPreferences.getInstance();
+    final employeeJson = jsonEncode(employees.map((e) => e.toJson()).toList());
+    await prefs.setString('cached_employees', employeeJson);
+  }
+
+  Future<List<Employee>?> getCachedEmployees() async {
+    final prefs = await SharedPreferences.getInstance();
+    final employeeJson = prefs.getString('cached_employees');
+    if (employeeJson != null) {
+      final List<dynamic> data = jsonDecode(employeeJson);
+      return data.map((e) => Employee.fromJson(e)).toList();
+    }
+    return null;
   }
 }

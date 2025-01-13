@@ -1,3 +1,4 @@
+import 'package:employees_app/view/employee_list_page.dart';
 import 'package:flutter/material.dart';
 import 'package:employees_app/view/employee_page.dart';
 
@@ -13,7 +14,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Employee Data Fetch',
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const EmployeeScreen(),
+      home: const EmployeeListScreen(),
     );
   }
 }
