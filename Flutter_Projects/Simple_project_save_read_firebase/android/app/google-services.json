@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "999349533286",
+    "project_id": "simplefluttersavedata",
+    "storage_bucket": "simplefluttersavedata.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:999349533286:android:a71c17b86599775dfc8ba7",
+        "android_client_info": {
+          "package_name": "com.example.simple_project_save_read_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA1Ooj6tx39ZEiTTZuktPnJUpt2_TCh5-M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
