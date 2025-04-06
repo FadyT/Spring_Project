@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
-import 'AbsenceCalculator.dart';  // For date formatting
+import 'AbsenceCalculator.dart';
 
 class EmployeeProfilePage extends StatefulWidget {
-  @override
-  _EmployeeProfilePageState createState() => _EmployeeProfilePageState();
-}
+  final String userId;
 
-class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
-  final String userId = FirebaseAuth.instance.currentUser!.uid;
+  const EmployeeProfilePage({super.key, required this.userId});
+
+  @override
+  EmployeeProfilePageState createState() => EmployeeProfilePageState();
+}
+class EmployeeProfilePageState extends State<EmployeeProfilePage> {
   late Stream<QuerySnapshot> _checkInsStream;
   late Stream<QuerySnapshot> _checkOutsStream;
   int? absenceDays;
@@ -19,53 +21,49 @@ class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
   @override
   void initState() {
     super.initState();
-    _checkInsStream = FirebaseFirestore.instance
-        .collection('attendance')
-        .where('user_id', isEqualTo: userId)
-        .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(DateTime.now())) // Ensure only past or present records
-        .orderBy('timestamp', descending: true) // Order by most recent
-        .snapshots();
 
-    _checkOutsStream = FirebaseFirestore.instance
-        .collection('check_out')  // Assuming you have a collection for check-outs
-        .where('user_id', isEqualTo: userId)
+    // Use widget.userId correctly
+    _checkInsStream = FirebaseFirestore.instance
+        .collection('attendance')  // Assuming attendance collection for check-ins
+        .where('user_id', isEqualTo: widget.userId)
+        .where('type', isEqualTo: 'check_in')  // Ensure we filter by type for check-out
         .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(DateTime.now()))
         .orderBy('timestamp', descending: true)
         .snapshots();
 
-    // Calculate employee absence days on page load
-    _calculateEmployeeAbsence(userId);
+    _checkOutsStream = FirebaseFirestore.instance
+        .collection('attendance')  // Assuming attendance collection for check-outs too (or a separate one)
+        .where('user_id', isEqualTo: widget.userId)
+        .where('type', isEqualTo: 'check_out')  // Ensure we filter by type for check-out
+        .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(DateTime.now()))
+        .orderBy('timestamp', descending: true)
+        .snapshots();
+
+    _calculateEmployeeAbsence(widget.userId);
   }
 
-  // Function to calculate employee absence
+  // Calculate Absence Days
   void _calculateEmployeeAbsence(String userId) async {
-    // Get the current year
-    int currentYear = DateTime.now().year;
-
-    // Starting from January 1st of the current year
-    DateTime startDate = DateTime(currentYear, 1, 1);
-
-    // Ending at the current date (not future)
-    DateTime endDate = DateTime.now();
+    DateTime now = DateTime.now();
+    DateTime startDate = DateTime(now.year, 1, 1);
+    DateTime endDate = now;
 
     AbsenceCalculator calculator = AbsenceCalculator();
     int absenceCount = await calculator.calculateAbsence(userId, startDate, endDate);
 
-    // Check if the widget is still mounted before calling setState
     if (mounted) {
       setState(() {
         absenceDays = absenceCount;
       });
     }
 
-    print('Employee absence days for $currentYear: $absenceCount');
+    print('Employee absence days for ${now.year}: $absenceCount');
   }
 
-  // Function to format timestamp
+  // Format Timestamp
   String _formatTimestamp(Timestamp timestamp) {
-    // Format the timestamp to a readable date format
-    final date = DateTime.fromMillisecondsSinceEpoch(timestamp.seconds * 1000);
-    final format = DateFormat("MMMM d, yyyy 'at' h:mm:ss a 'UTC+2'");  // Customize the format
+    final date = timestamp.toDate().toLocal();
+    final format = DateFormat("MMMM d, yyyy 'at' h:mm:ss a");
     return format.format(date);
   }
 
@@ -73,103 +71,100 @@ class _EmployeeProfilePageState extends State<EmployeeProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Employee Profile'),
+        title: const Text('Employee Profile'),
       ),
-      body: SingleChildScrollView(  // Make the entire body scrollable
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Display Absence Days at the top
-              absenceDays == null
-                  ? CircularProgressIndicator()
-                  : Text(
-                'Absence Days: $absenceDays',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(height: 20),
-              // Display Check-in List
-              Text(
-                'Check-in Days',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              StreamBuilder<QuerySnapshot>(
-                stream: _checkInsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            absenceDays == null
+                ? const Center(child: CircularProgressIndicator())
+                : Text(
+              'Absence Days: $absenceDays',
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 20),
 
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
+            const Text(
+              'Check-in Days',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: _checkInsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('No check-ins found.'));
-                  }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-                  final checkIns = snapshot.data!.docs;
+                final checkIns = snapshot.data?.docs ?? [];
 
-                  return ListView.builder(
-                    shrinkWrap: true,  // Ensure ListView takes only the necessary space
-                    physics: NeverScrollableScrollPhysics(), // Disable ListView scrolling, as the whole page is scrollable
-                    itemCount: checkIns.length,
-                    itemBuilder: (context, index) {
-                      final checkIn = checkIns[index];
-                      final timestamp = checkIn['timestamp'] as Timestamp;
-                      final formattedDate = _formatTimestamp(timestamp);
+                if (checkIns.isEmpty) {
+                  return const Center(child: Text('No check-ins found.'));
+                }
 
-                      return ListTile(
-                        title: Text(formattedDate),
-                        leading: Icon(Icons.access_time),
-                      );
-                    },
-                  );
-                },
-              ),
-              SizedBox(height: 20),
-              // Display Check-out List
-              Text(
-                'Check-out Days',
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              StreamBuilder<QuerySnapshot>(
-                stream: _checkOutsStream,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: checkIns.length,
+                  itemBuilder: (context, index) {
+                    final checkIn = checkIns[index];
+                    final timestamp = checkIn['timestamp'] as Timestamp;
+                    final formattedDate = _formatTimestamp(timestamp);
 
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
+                    return ListTile(
+                      title: Text(formattedDate),
+                      leading: const Icon(Icons.access_time),
+                    );
+                  },
+                );
+              },
+            ),
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return Center(child: Text('No check-outs found.'));
-                  }
+            const SizedBox(height: 20),
+            const Text(
+              'Check-out Days',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            ),
+            StreamBuilder<QuerySnapshot>(
+              stream: _checkOutsStream,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
 
-                  final checkOuts = snapshot.data!.docs;
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
 
-                  return ListView.builder(
-                    shrinkWrap: true,  // Ensure ListView takes only the necessary space
-                    physics: NeverScrollableScrollPhysics(), // Disable ListView scrolling, as the whole page is scrollable
-                    itemCount: checkOuts.length,
-                    itemBuilder: (context, index) {
-                      final checkOut = checkOuts[index];
-                      final timestamp = checkOut['timestamp'] as Timestamp;
-                      final formattedDate = _formatTimestamp(timestamp);
+                final checkOuts = snapshot.data?.docs ?? [];
 
-                      return ListTile(
-                        title: Text(formattedDate),
-                        leading: Icon(Icons.exit_to_app),
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
-          ),
+                if (checkOuts.isEmpty) {
+                  return const Center(child: Text('No check-outs found.'));
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: checkOuts.length,
+                  itemBuilder: (context, index) {
+                    final checkOut = checkOuts[index];
+                    final timestamp = checkOut['timestamp'] as Timestamp;
+                    final formattedDate = _formatTimestamp(timestamp);
+
+                    return ListTile(
+                      title: Text(formattedDate),
+                      leading: const Icon(Icons.exit_to_app),
+                    );
+                  },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

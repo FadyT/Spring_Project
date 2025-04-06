@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:attendance/LoginPage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,22 +12,54 @@ class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
-
 class _HomePageState extends State<HomePage> {
   Location location = Location();
   double? latitude;
   double? longitude;
   String? error;
   bool isInsideArea = false;
+  bool isLoadingLocation = true; // Flag to show loading for location
+  bool isLoadingOfficeLocation = true; // Flag to show loading for office location
 
-  final double targetLatitude = 37.4219983;
-  final double targetLongitude = -122.084;
   final user = FirebaseAuth.instance.currentUser;
+  double? targetLatitude;
+  double? targetLongitude;
 
   @override
   void initState() {
     super.initState();
+    _getOfficeLocation(); // Get office location from Firestore
     _getLocation();
+  }
+
+  // Fetch office location (latitude and longitude) from Firestore
+  Future<void> _getOfficeLocation() async {
+    try {
+      final officeLocationDoc = await FirebaseFirestore.instance
+          .collection('settings')
+          .doc('office_location')
+          .get()
+          .timeout(Duration(seconds: 10));  // Timeout after 10 seconds
+
+      if (officeLocationDoc.exists) {
+        setState(() {
+          targetLatitude = officeLocationDoc['latitude'];
+          targetLongitude = officeLocationDoc['longitude'];
+          print("Location retrieved sucessfully $targetLatitude : $targetLongitude");
+          isLoadingOfficeLocation = false; // Set loading to false when data is loaded
+        });
+      } else {
+        setState(() {
+          error = 'Office location not found.';
+          isLoadingOfficeLocation = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        error = 'Error fetching office location: $e';
+        isLoadingOfficeLocation = false;
+      });
+    }
   }
 
   Future<void> _getLocation() async {
@@ -53,7 +86,7 @@ class _HomePageState extends State<HomePage> {
       double lat = locData.latitude!;
       double lon = locData.longitude!;
 
-      double distance = _calculateDistance(lat, lon, targetLatitude, targetLongitude);
+      double distance = _calculateDistance(lat, lon, targetLatitude!, targetLongitude!);
 
       setState(() {
         latitude = lat;
@@ -173,7 +206,9 @@ class _HomePageState extends State<HomePage> {
   void _goToEmployeeProfile() {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => EmployeeProfilePage()),
+      MaterialPageRoute(
+        builder: (context) => EmployeeProfilePage(userId: user!.uid),
+      ),
     );
   }
 
@@ -189,17 +224,17 @@ class _HomePageState extends State<HomePage> {
               await FirebaseAuth.instance.signOut();
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => AuthPage()),
+                MaterialPageRoute(builder: (_) => LoginPage()),
               );
             },
           ),
         ],
       ),
       body: Center(
-        child: error != null
+        child: isLoadingOfficeLocation
+            ? CircularProgressIndicator() // Show loading until office location is fetched
+            : error != null
             ? Text(error!)
-            : (latitude == null || longitude == null)
-            ? CircularProgressIndicator()
             : Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
